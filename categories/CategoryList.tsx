@@ -11,7 +11,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../App";
+import { RootStackParamList } from "../NavigationWrapper";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import { fetchCategories } from "./categorySlice";
 
 const API_URL = "http://localhost:3000/categories";
 const CategoryList: React.FC = () => {
@@ -20,22 +23,29 @@ const CategoryList: React.FC = () => {
     "CategoryList"
   >;
   const navigation = useNavigation<NavigationProp>();
-  const [categories, setCategories] = useState<CategoryEntity[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchCategories = async () => {
-    try {
-      const respone = await CategoriesAPI.getCategories();
-      setCategories(respone);
-    } catch (error) {
-      console.error("Oops could not fetch error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const categories = useSelector(
+    (state: RootState) => state.category.categories
+  );
+  const dispatch = useDispatch<AppDispatch>();
+  console.log(categories);
+
+  // const [categories, setCategories] = useState<CategoryEntity[]>([]);
+  // const [loading, setLoading] = useState<boolean>(true);
+
+  // const fetchCategories = async () => {
+  //   try {
+  //     const respone = await CategoriesAPI.getCategories();
+  //     setCategories(respone);
+  //   } catch (error) {
+  //     console.error("Oops could not fetch error", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
-    fetchCategories();
+    dispatch(fetchCategories());
   }, []);
 
   const renderItem = ({ item }: { item: CategoryEntity }) => (
@@ -46,25 +56,27 @@ const CategoryList: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {loading ? (
+      {/* {loading ? (
         <ActivityIndicator size="large" color="#000[0ff" />
-      ) : categories.length > 0 ? (
-        <View>
-          <Button
-            onPress={() => navigation.navigate("CreateNewCategory")}
-            title="Create new Category"
-            color="#841584"
-          />
+      ) : categories.length > 0 ? ( */}
+      <View>
+        <Button
+          onPress={() => navigation.navigate("CreateNewCategory")}
+          title="Create new Category"
+          color="#841584"
+        />
+        {categories && categories.length > 0 && (
           <FlatList
             data={categories}
-            keyExtractor={(item) => item.id!.toString()}
+            keyExtractor={(item) => item.id?.toString() ?? ""}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
           />
-        </View>
-      ) : (
+        )}
+      </View>
+      {/* ) : (
         <Text style={styles.emptyMessage}>No categories found</Text>
-      )}
+      )} */}
     </View>
   );
 };

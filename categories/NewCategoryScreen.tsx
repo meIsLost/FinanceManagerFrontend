@@ -2,22 +2,30 @@ import { useState } from "react";
 import { CategoriesAPI } from "./CategoriesAPI";
 import { CategoryEntity } from "./CategoryEntity";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import { createCategory } from "./categorySlice";
 
 const NewCategoryScreen: React.FC = () => {
   const [title, setTitle] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const error = useSelector((state: RootState) => state.category.errormessage); // view subscribes to the store
+
   const onCreateCategory = async () => {
     const newCategory = new CategoryEntity(title);
-    try {
-      const createdCategory = await CategoriesAPI.createCategories(newCategory);
-      console.log("category created", createdCategory);
-    } catch (error) {
-      console.error("error creating category", error);
-    }
+    dispatch(createCategory(newCategory));
+    // try {
+    //   const createdCategory = await CategoriesAPI.createCategories(newCategory);
+    //   console.log("category created", createdCategory);
+    // } catch (error) {
+    //   console.error("error creating category", error);
+    // }
   };
 
   return (
     <View style={styles.container}>
       <Text>Create a New Category</Text>
+      <Text>{error}</Text>
       <TextInput
         style={styles.input}
         onChangeText={setTitle}
